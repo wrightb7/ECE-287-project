@@ -38,10 +38,15 @@ ENTITY hw_image_generator IS
 		row			:	IN		INTEGER;		--row pixel coordinate
 		butL, butR : in std_logic; --buttons
 		CLK_50MHz : in std_logic;
+		reset : in std_logic;
+		startsw :in std_logic;
 		
 		red			:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');  --	 magnitude output to DAC
 		green			:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');  --green magnitude output to DAC
-		blue			:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0')); --blue magnitude output to DAC
+		blue			:	OUT	STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0'); --blue magnitude output to DAC
+		
+		livesLED 			: OUT 	std_logic_vector(2 downto 0);
+		scoreInc			:	OUT	std_logic);
 		
 END hw_image_generator;
 
@@ -52,25 +57,34 @@ ARCHITECTURE behavior OF hw_image_generator IS
 signal userPos :  std_logic_vector(1 downto 0); -- this gives lane number
 Signal start : integer range 0 to 650; 
 signal move : std_logic_vector(23 downto 0); --moving (both obstacles and user)
-signal spawn : std_logic_vector(25 downto 0); --spawning the obstacles
+signal spawn : std_logic_vector(26 downto 0); --spawning the obstacles
+signal spawn2 : std_logic_vector(24 downto 0);
 Signal lane : std_logic_vector(1 downto 0);
-Signal obsNum : std_logic_vector(7 downto 0);
+Signal obsNum : std_logic_vector(7 downto 0) := "00000000" ;
 signal pos1, pos2, pos3, pos4, pos5, pos6, pos7, pos8 : integer range 0 to 450;
+signal lives : std_logic_vector(1 downto 0) := "11";
+signal level : std_logic_vector(6 downto 0);
 
 
 BEGIN
-	PROCESS(disp_ena, row, column)
+	PROCESS(disp_ena, row, column, reset, startsw)
 	BEGIN
 
-		
+		if startsw = '1' then
+	  
 		
 		if CLK_50MHz'event and CLK_50MHz = '1' then
 				
+				
+				
 			if move < "101111101011110000100000" then
 					move <= move + 1;
+					scoreInc <= '0';
 			else
 			
 				lane <= lane + 1;
+				
+				
 				
 				
 				--this is for the user's move
@@ -85,94 +99,188 @@ BEGIN
 				--determining obstacle position
 				if obsNum(0) = '1' then
 					pos1 <= pos1 + 50;
+					if pos1 = 400 AND userPos = "00" then
+							lives <= lives - 1;
+					end if;
 					if pos1 = 450 then
 						pos1 <= 0;
 						obsNum(0) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(1) = '1' then
 					pos2 <= pos2 + 50;
+					if pos2 = 400 AND userPos = "01" then
+							lives <= lives - 1;
+					end if;
 					if pos2 = 450 then
 						pos2 <= 0;
 						obsNum(1) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(2) = '1' then
 					pos3 <= pos3 + 50;
+					if pos3 = 400 AND userPos = "10" then
+							lives <= lives - 1;
+					end if;
 					if pos3 = 450 then
 						pos3 <= 0;
 						obsNum(2) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(3) = '1' then
 					pos4 <= pos4 + 50;
+					if pos4 = 400 AND userPos = "11" then
+							lives <= lives - 1;
+					end if;
 					if pos4 = 450 then
 						pos4 <= 0;
 						obsNum(3) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(4) = '1' then
-					pos5 <= pos5 + 50;
-					if pos5 = 450 then
+					pos5 <= pos5 + 60;
+					if pos5 = 420 AND userPos = "00" then
+							lives <= lives - 1;
+					end if;
+					if pos5 = 480 then
 						pos5 <= 0;
 						obsNum(4) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(5) = '1' then
-					pos6 <= pos6 + 50;
-					if pos6 = 450 then
+					pos6 <= pos6 + 60;
+					if pos6 = 420 AND userPos = "01" then
+							lives <= lives - 1;
+					end if;
+					if pos6 = 480 then
 						pos6 <= 0;
 						obsNum(5) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(6) = '1' then
-					pos7 <= pos7 + 50;
-					if pos7 = 450 then
+					pos7 <= pos7 + 60;
+					if pos7 = 420 AND userPos = "10" then
+							lives <= lives - 1;
+					end if;
+					if pos7 = 480 then
 						pos7 <= 0;
 						obsNum(6) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				if obsNum(7) = '1' then
-					pos8 <= pos8 + 50;
-					if pos8 = 450 then
+					pos8 <= pos8 + 60;
+					if pos8 = 420 AND userPos = "11" then
+							lives <= lives - 1;
+					end if;
+					if pos8 = 480 then
+						
 						pos8 <= 0;
 						obsNum(7) <= '0';
+						scoreInc <= '1';
+						if NOT(level = "111000") then  
+							level <= level + 1;
+						end if;
 					end if;
 				end if;
 				
+				
+				
+				if lives = "11" then
+					livesLED <= "111";
+				elsif lives = "10" then
+					livesLED <= "011";
+				elsif lives = "01" then
+					livesLED <= "001";
+				else
+					livesLED <= "000";
+				end if;
+				
+				if lives = "00" then
+				obsNum(0) <= '0';
+				obsNum(1) <= '0';
+				obsNum(2) <= '0';
+				obsNum(3) <= '0';
+				obsNum(4) <= '0';
+				obsNum(5) <= '0';
+				obsNum(6) <= '0';
+				obsNum(7) <= '0';
+				end if;
 			end if;
 		end if;
-		if CLK_50MHz'event and CLK_50MHz = '1' then
-			if spawn < "10001010001110010011101011" then --should be 3/7 hz
+	
+		
+		if CLK_50MHz'event and CLK_50MHz = '1' and NOT(lives = "00") then
+			if level <= "0010100" OR level >= "110111" then 
+			if spawn < "100010100011100100111010111" then --should be  hz
 					spawn <= spawn + 1;
 			else
-				if lane = "000" then
+				if lane = "00" then
 					if obsnum(0) <= '0' then
 						obsNum(0) <= '1';
 					end if;
-				elsif lane = "001" then
+				elsif lane = "01" then
 					if obsnum(1) <= '0' then
 						obsNum(1) <= '1';
 					end if;
 				
-				elsif lane = "010" then
+				elsif lane = "10" then
 					if obsnum(2) <= '0' then
 						obsNum(2) <= '1';
 					end if;
-				elsif lane = "011" then
+				elsif lane = "11" then
 					if obsnum(3) <= '0' then
 						obsNum(3) <= '1';
 					end if;
-				elsif lane = "100" then
+				end if;
+				
+				spawn <= (others => '0');
+			end if;
+			end if;
+		end if;
+		
+		if CLK_50MHz'event and CLK_50MHz = '1' and NOT(lives = "00") then
+			if level > "0010100" then
+			if spawn2 < "1001110010001110010011101" then --should be  hz
+					spawn2 <= spawn2 + 1;
+			else
+				if lane = "00" then
 					if obsnum(4) <= '0' then
 						obsNum(4) <= '1';
 					end if;
-				elsif lane = "101" then
+				elsif lane = "01" then
 					if obsnum(5) <= '0' then
 						obsNum(5) <= '1';
 					end if;
 				
-				elsif lane = "110" then
+				elsif lane = "10" then
 					if obsnum(6) <= '0' then
 						obsNum(6) <= '1';
 					end if;
@@ -182,10 +290,12 @@ BEGIN
 					end if;
 				end if;
 				
-				spawn <= (others => '0');
+				spawn2 <= (others => '0');
 			end if;
 		end if;
 		
+		end if;
+		end if;
 		
 		
 		
@@ -202,12 +312,36 @@ BEGIN
 			end if;
 
 		
+		if reset = '0' then
+		   red	<= (OTHERS => '0');
+			green <= (OTHERS => '0');
+			blue <= (OTHERS => '0');
+			obsNum(0) <= '0';
+			obsNum(1) <= '0';
+			obsNum(2) <= '0';
+			obsNum(3) <= '0';
+			obsNum(4) <= '0';
+			obsNum(5) <= '0';
+			obsNum(6) <= '0';
+			obsNum(7) <= '0';
+			pos1 <= 0;
+			pos2 <= 0;
+			pos3 <= 0;
+			pos4 <= 0;
+			pos5 <= 0;
+			pos6 <= 0;
+			pos7 <= 0;
+			pos8 <= 0;
+		   lives <= "11";
+			level <= "0000000";
+		end if;
+		
 		
 		
 		IF(disp_ena = '1') THEN		--display time
 		
 		
-			If(row > 450 and (column > (0 + start) AND column <  (start +160))) then
+			If(row > 450 and (column > (40 + start) AND column <  (start +120))) then
 				red	<= (OTHERS => '1');
 				green	<= (OTHERS => '1');
 				blue <= (OTHERS => '1');
@@ -218,56 +352,56 @@ BEGIN
 			end if;
 			
 			if obsNum(0) = '1' then
-				If((row > (0 + pos1) AND row < (50 + pos1))and (column > 0 AND column <  160)) then
+				If((row > (0 + pos1) AND row < (50 + pos1))and (column > 40 AND column <  120)) then
 				red   <= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(1) = '1' then
-				If((row > (0 + pos2) AND row < (50 + pos2))and (column > 160 AND column <  320)) then
+				If((row > (0 + pos2) AND row < (50 + pos2))and (column > 200 AND column <  280)) then
 				red	<= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(2) = '1' then
-				If((row > (0 + pos3) AND row < (50 + pos3)) and (column > 320 AND column <  480)) then
+				If((row > (0 + pos3) AND row < (50 + pos3)) and (column > 360 AND column <  440)) then
 				red	<= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(3) = '1' then
-				If((row > (0 + pos4) AND row < (50 + pos4)) and (column > 480)) then
+				If((row > (0 + pos4) AND row < (50 + pos4)) and (column > 520 AND column < 600)) then
 				red	<= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(4) = '1' then
-				If((row > (0 + pos5) AND row < (50 + pos5))and (column > 0 AND column <  160)) then
+				If((row > (0 + pos5) AND row < (50 + pos5))and (column > 40 AND column <  120)) then
 				red   <= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(5) = '1' then
-				If((row > (0 + pos6) AND row < (50 + pos6))and (column > 160 AND column <  320)) then
+				If((row > (0 + pos6) AND row < (50 + pos6))and (column > 200 AND column <  280)) then
 				red	<= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(6) = '1' then
-				If((row > (0 + pos7) AND row < (50 + pos7)) and (column > 320 AND column <  480)) then
+				If((row > (0 + pos7) AND row < (50 + pos7)) and (column > 360 AND column <  440)) then
 				red	<= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
 				end if;
 			end if;
 			if obsNum(7) = '1' then
-				If((row > (0 + pos8) AND row < (50 + pos8)) and (column > 480)) then
+				If((row > (0 + pos8) AND row < (50 + pos8)) and (column > 520 AND column < 600)) then
 				red	<= (OTHERS => '0');
 				green	<= (OTHERS => '0');
 				blue <= (OTHERS => '1');
@@ -276,7 +410,6 @@ BEGIN
 		
 		
 		
-			
 		ELSE								--blanking time
 			red	<= (OTHERS => '0');
 			green <= (OTHERS => '0');
