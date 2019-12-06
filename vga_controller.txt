@@ -62,16 +62,16 @@ BEGIN
 		VARIABLE v_count	:	INTEGER RANGE 0 TO v_period - 1 := 0;  --vertical counter (counts the rows)
 	BEGIN
 	
-		IF(reset_n = '0') THEN		--reset asserted
-			h_count := 0;				--reset horizontal counter
-			v_count := 0;				--reset vertical counter
-			h_sync <= NOT h_pol;		--deassert horizontal sync
-			v_sync <= NOT v_pol;		--deassert vertical sync
-			disp_ena <= '0';			--disable display
-			column <= 0;				--reset column pixel coordinate
-			row <= 0;					--reset row pixel coordinate
+		--IF(reset_n = '0') THEN		--reset asserted
+			--h_count := 0;				--reset horizontal counter
+			--v_count := 0;				--reset vertical counter
+			--h_sync <= NOT h_pol;		--deassert horizontal sync
+			--v_sync <= NOT v_pol;		--deassert vertical sync
+			--disp_ena <= '0';			--disable display
+			--column <= 0;				--reset column pixel coordinate
+			--row <= 0;					--reset row pixel coordinate
 			
-		ELSIF(pixel_clk'EVENT AND pixel_clk = '1') THEN
+		IF(pixel_clk'EVENT AND pixel_clk = '1') THEN
 
 			--counters
 			IF(h_count < h_period - 1) THEN		--horizontal counter (pixels)
